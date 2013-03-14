@@ -1,3 +1,12 @@
-define({
-	"text" : "I'm just for testing"
+def(function(){
+	/**
+	 * 
+	 */
+	return declare({
+		"@name" : "qun.lang.Object",
+		"@synthesize" : ["delegate"],
+		"self" : function(){
+
+		}
+	});
 });

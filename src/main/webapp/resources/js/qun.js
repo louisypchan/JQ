@@ -27,6 +27,7 @@
 		}
 		return 1;	
 	}()),
+	rsr = /\./g,
 	aF = new Function,
 	extraNames = (bugForInSkips ? "hasOwnProperty.valueOf.isPrototypeOf.propertyIsEnumerable.toLocaleString.toString.constructor".split(".") : []);
 
@@ -51,6 +52,7 @@
 
 	qun.CONST = {
 			PRIVATE_PREFIX : "-",
+			PUBLIC_STATIC_PREFIX : "+",
 			CONSTRUCTOR : "self",
 			SKIP_PREFIX : "@",
 			SYNTHESIZE : "@synthesize",
@@ -109,6 +111,18 @@
 			isPrivate : function(it){
 				return it.indexOf(qun.CONST.PRIVATE_PREFIX) > -1;
 			},
+			/**
+			 * 
+			 * @param it
+			 */
+			isPublicAndStatic : function(it){
+				return it.indexOf(qun.CONST.PUBLIC_STATIC_PREFIX) > -1;
+			},
+			/**
+			 * 
+			 * @param it
+			 * @returns {Boolean}
+			 */
 			isSkipable : function(it){
 				return it.indexOf(qun.CONST.SKIP_PREFIX) > -1;
 			},
@@ -153,7 +167,7 @@
 						if(qun.Utils.isPrivate(name)){
 							name = name.substr(1);
 							t._private = true;
-						}
+						}						
 						if(qun.Utils.isFunction(t)){
 							t._name = name;
 						}
@@ -217,6 +231,27 @@
 						}
 					}
 				}
+			},
+			/**
+			 * 
+			 * @param it
+			 */
+			convertToSlash : function(/*Array*/it){
+				var t = it.join("|");
+				t = t.replace(rsr, "/");
+				it = t.split("|");
+				return it;
+			},
+			crackPublicAndStatic : function(it){
+				var t = new it, name, src;
+				for(name in t){
+					if(qun.Utils.isPublicAndStatic(name)){
+						src = t[name];
+						name = name.substr(1);
+						it[name] = src;
+					}
+				}
+				t = name = src = null;
 			}
 	};
 	/**
@@ -413,11 +448,10 @@
 		}
 		//add all properties
 		qun.Utils[p](proto, it);
-
+		//new constructor
 		if(it.self){
 			constructor = constructor.concat(it.self);
 		}
-
 		//console.log(proto);
 		//console.log(constructor);
 		var f = (function(ctor){
@@ -438,6 +472,8 @@
 		proto.callSuper = callSuperImpl;
 		//construct the prototype
 		f.prototype = proto;
+		//crack public and static
+		qun.Utils.crackPublicAndStatic(f);
 		//cache the construct class
 		proto._class = f;
 		//add name if specified
@@ -484,7 +520,7 @@
 	 * 
 	 * 
 	 */
-	var exec, dove;
+	var def, req;
 	/**
 	 * put them out
 	 */
@@ -494,13 +530,13 @@
 	/**
 	 * Root Class
 	 */
-	declare({
+	/*declare({
 		"@name" : "qun.lang.Object",
 		"@synthesize" : ["delegate"],
 		"self" : function(){
 
 		}
-	});
+	});*/
 
 	/**
 	 * Below functions depends on requirejs from http://requirejs.org/
@@ -523,34 +559,41 @@
 			return dir;
 		})(document);
 		//default configuration
-		dove = function(){
+		//re-contruct require and define
+		req = function(){
 			var args = arguments,t;
 			if(qun.Utils.isString(args[0])){
-				args[0] = args[0].replace(/\./g, "/");
+				args[0] = [args[0]];
 			}
-			if(qun.Utils.isArray(args[0])){
-				t = args[0].join("|");
-				t = t.replace(/\./g, "/");
-				args[0] = t.split("|");
-			}
-			require.apply(this, args);
+			args[0] = qun.Utils.convertToSlash(args[0]);
+			require.apply(win, args);
 		};
 		//cache
-		dove.config = require.config;
+		req.config = require.config;
 		//
-		dove.config({
+		req.config({
 			baseUrl : baseUrl,
 			paths : {
 				"qun" : "class"
 			}
 		});
+		def = function(){
+			var args = arguments, arity = args.length,t;
+			if(arity == 2){
+				args[0] = qun.Utils.convertToSlash(args[0]);
+			}else if(arity == 3){
+				args[1] = qun.Utils.convertToSlash(args[1]);		
+			}
+			define.apply(win, args);
+		};
+		
 	}
-
+	
 	/**
 	 * End area ======================================================
 	 */	
 
-
-
+	window.req = req;
+	window.def = def;
 	//win["@"] = _qun;
 })(window);
