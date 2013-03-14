@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../resources/js/require.js"></script>
+<script type="text/javascript" src="../resources/js/qun.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		
+		/*qun.config({
+			
+		});*/
+		/*var b = declare({
+			
+			"@synthesize" : ["value"],
+			test : "Sandy",
+			self : function(str){
+				//console.log("dd" + this.test);
+				console.log("b");
+				//console.log(this.bbddbear);
+				
+				//this.value = 1;
+			}
+		});
+		
+		var a = declare(b, {
+			self : function(){
+				console.log("a");
+			}
+		});
+		
+		t = new a();*/
+		//t = new b();
+		//t = new b("I love ");
+		
+		/*a = declare({
+			"@superclass" : null,
+			"@name" : null,
+			"@synthesize" : ["value"],
+			"-test" : function(){
+				
+			},
+			self : function(){
+				console.log("a");
+			},
+			m1 : function(){
+				console.log("a.m1");
+			},
+			setValue : function(value){
+				console.log("a1");
+			}
+		});
+	
+		
+		b = declare({
+			"@superclass" : null,
+			"@synthesize" : ["value"],
+			self : function(){
+				console.log("b");
+			},
+			
+			m1 : function(){
+				//this.callSuper(arguments);
+				console.log("b.m1");	
+			},
+			
+			m2 : function(){
+				
+			},
+			setValue : function(value){
+				console.log("a2");
+			}
+		});
+		
+		d = declare({
+			"@superclass" : b,
+			
+			m1 : function(){
+				this.callSuper(arguments);
+				console.log("d.m1");
+			},
+			
+			m3 : function(){
+				
+			}
+		});
+		//[A,B] [B,A] [A,B]
+		//[B] [B,A] [B] => [A]
+		//
+		
+		
+		//[a] [d,b], [a,d] =>[]
+		//[d,b] [d] =>[a]
+		//[b] => [a,d]
+		//[a,d,b]
+		
+		c = declare({
+			"@superclass" : [a,d],
+			
+			self : function(){
+				console.log("c");
+			},
+			m1 : function(){
+				this.callSuper(arguments);
+				console.log("c.m1");
+			}
+		});*/
+		
+		//t.m1() b.m1 d.m1 c.m1
+		//b  = new a();
+		
+		/*@("qun.lang.Object", function(Object){
+			console.log("ddd");
+		});*/
+	</script>
+</body>
+</html>
