@@ -6,7 +6,7 @@ def(function(){
 		"@name" : "qun.lang.Object",
 		"@synthesize" : ["delegate"],
 		"self" : function(){
-
+			
 		}
 	});
 });
