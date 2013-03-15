@@ -220,7 +220,7 @@
 
 				//delete privates
 				for(name in target){
-					if(target[name]._private){
+					if(target[name] && target[name]._private){
 						delete target[name];
 						t = target.__proto__;
 						while(t && !t[name]){
@@ -252,6 +252,13 @@
 					}
 				}
 				t = name = src = null;
+			},
+			
+			hook : function(scope, method){
+				var args = arguments.length, arity = args.length;
+				if(arity > 2){
+					//Todo
+				}
 			}
 	};
 	/**
