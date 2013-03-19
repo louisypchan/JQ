@@ -1,4 +1,4 @@
-def(["qun.lang.Object"], function(Object){
+def(["qun.lang.Object","qun.lang.Util"], function(Object, Util){
 	
 	var controller =  declare({
 		"@superclass" : Object,

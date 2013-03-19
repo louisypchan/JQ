@@ -134,19 +134,19 @@
 			 * @returns
 			 */
 			getProp : function(parts, create, context){
-				var p, i = 0;
-				if(!context){
+				var p, i = 0, rs = context;
+				if(!rs){
 					if(!parts.length){
 						return window;
 					}else{
 						p = parts[i++];
-						context = window[p] || (create ? window[p] = {} : undefined);
+						rs = window[p] || (create ? window[p] = {} : undefined);
 					}
 				}
-				while(context && (p = parts[i++])){
-					context = (p in context ? context[p] : (create ? context[p] = {} : undefined));
+				while(rs && (p = parts[i++])){
+					rs = (p in rs ? rs[p] : (create ? rs[p] = {} : undefined));
 				}
-				return context;
+				return rs;
 			},
 			set : function(name, value, context){
 				var parts = name.split("."), p = parts.pop(), obj = qun.Utils.getProp(parts, true, context);
@@ -253,12 +253,41 @@
 				}
 				t = name = src = null;
 			},
-			
-			hook : function(scope, method){
+			/**
+			 * This functions refers to the lang.hitch of dojo foundation.
+			 * @param scope
+			 * @param method
+			 * @param args
+			 * @returns
+			 */
+			hook : function(scope, method, /*Array*/args){
 				var args = arguments.length, arity = args.length;
 				if(arity > 2){
 					//Todo
+					var named = qun.Utils.isString(method);
+					return function(){
+						//locate method
+						var f = named ? (scope||window)[method] : method;
+						return f && f.apply(scope||window, args.concat(arguments));
+					};
 				}
+				if(!method){
+					method = scope;
+					scope = null;
+				}
+				if(qun.Utils.isString(method)){
+					scope = scope || window;
+					if(!scope[method]){
+						qun.Utils.makeErr("hook failed");
+					}
+					return function(){
+						return scope[method].apply(scope, args||[]);
+					};
+				}
+				return !scope ? method : function() { return method.apply(scope, args||[]); };
+			},
+			makeErr : function(msg){
+				throw(msg);
 			}
 	};
 	/**
