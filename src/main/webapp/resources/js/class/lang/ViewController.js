@@ -8,7 +8,7 @@ def(["qun.lang.Object","qun.lang.Util"], function(Object, Util){
 		"@synthesize" : ["view"],	
 		
 		"self" : function(){
-			
+	
 		},
 		
 		viewWillAppear : function(){

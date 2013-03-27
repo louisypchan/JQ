@@ -5,10 +5,20 @@ def(["qun.lang.Object"], function(Object){
 		
 		"@name" : "qun.lang.View",
 		
-		"@synthesize" : ["id"],
+		"@synthesize" : ["id","zIndex","opacity"],
 		
-		"self" : function(layer){
+		"self" : function(/*String|DOMObject*/layer){
 			this.callSuper();
+			if(qun.Utils.isString(layer)){
+				layer = document.querySelector(layer);
+			}
+			this.layer = layer;
+			this.superview = null;
+			this.subviews = [];
+			this._zIndex = 0;
+			this._opacity = 1;
+			this._transitionsEnabled = false;
+			//
 			
 		},
 		

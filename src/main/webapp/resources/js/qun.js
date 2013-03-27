@@ -2,20 +2,6 @@
  * COPYRIGHT. Louis Y P Chen ALL RIGHTS RESERVED.
  * 
  */
-/**
- * declare({
- *  "@superclass" : Function || Array
- *  "@name" : String
- *  
- *  "-property" : Object
- *  
- *  self : Function  - Constructor
- *  
- *  
- * });
- *
- */
-
 ;(function(win){
 
 	//"use strict";
@@ -48,7 +34,7 @@
 			obj.__defineGetter__(prop, descriptor.get);
 			//value??
 		};
-	}	
+	}
 
 	qun.CONST = {
 			PRIVATE_PREFIX : "-",
@@ -57,7 +43,8 @@
 			SKIP_PREFIX : "@",
 			SYNTHESIZE : "@synthesize",
 			SUPERCLASS : "@superclass",
-			CLASSNAME : "@name"
+			CLASSNAME : "@name",
+			NATIVE : /^[^{]+\{\s*\[native code/
 	};
 
 	qun.Utils = {
@@ -110,6 +97,10 @@
 			 */
 			isPrivate : function(it){
 				return it.indexOf(qun.CONST.PRIVATE_PREFIX) > -1;
+			},
+			
+			isNative : function(fn){
+				return qun.CONST.NATIVE.test(fn + "");
 			},
 			/**
 			 * 
