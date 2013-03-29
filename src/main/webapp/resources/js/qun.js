@@ -279,6 +279,9 @@
 			},
 			makeErr : function(msg){
 				throw(msg);
+			},
+			uniqueId : function(){
+				return "qun-" + new Date().getTime();
 			}
 	};
 	/**

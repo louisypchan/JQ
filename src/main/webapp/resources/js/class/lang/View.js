@@ -7,6 +7,8 @@ def(["qun.lang.Object"], function(Object){
 		
 		"@synthesize" : ["id","zIndex","opacity"],
 		
+		"baseCSSClass" : "jqmView",
+		
 		"self" : function(/*String|DOMObject*/layer){
 			this.callSuper();
 			if(qun.Utils.isString(layer)){
@@ -20,6 +22,19 @@ def(["qun.lang.Object"], function(Object){
 			this._transitionsEnabled = false;
 			//
 			
+		},
+		
+		
+		createLayer : function(){
+			this.layer = document.createElement("div");
+		},
+		/**
+		 * 
+		 */
+		setupLayerCSS : function(){
+			for(var meta = this._meta, cssClass; meta._meta;){
+				//cssClass
+			}
 		},
 		
 		getId : function(){
