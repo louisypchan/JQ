@@ -27,6 +27,55 @@ def(function(){
 				}
 				return transform(value, key);
 			});
+		},
+		/**
+		 * 
+		 * @param className
+		 */
+		"-isClassNameValid" : function(className){
+			return className != null && className !="" && className === String(className).replace(/\s/g,"");
+		},
+		/**
+		 * Check the class is already one of the element's class?
+		 * @param it
+		 * @param className
+		 * @returns
+		 */
+		"-itHasClassName" : function(it, className){
+			return qun.CONST.SUPPORT_CLASS_LIST ? this.isClassNameValid(className) && it.classList.contains(className) : RegExp("(?:^|\\s+)" + className + "(?:\\s+|$)").test(it.className);
+		},
+		/**
+		 * 
+		 * @param it
+		 * @param className
+		 */
+		"-addClass" : function(it, className){
+			var exist = this.itHasClassName(it, className);
+			if(qun.CONST.SUPPORT_CLASS_LIST){
+				if(!exist){
+					it.classList.add(className);
+				}
+			}else{
+				if(!exist){
+					it.className = [it.className, className].join(" ");
+				}
+			}
+		},
+		"-removeClass" : function(it, className){
+			var exist = this.itHasClassName(it, className);
+			if(qun.CONST.SUPPORT_CLASS_LIST){
+				if(!exist){
+					it.classList.remove(className);
+				}
+			}else{
+				if(!exist){
+					it.className = it.className.replace(RegExp("(?:^|\\s+)" + className + "(?:\\s+|$)"), " ");
+				}
+			}			
+		},
+		"-toggleClass" : function(it, className){
+			var exist = this.itHasClassName(it, className);
+			this[!exist ? "addClass" : "removeClass"](it, className);
 		}
 	});
 	

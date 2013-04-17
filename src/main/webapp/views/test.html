@@ -7,6 +7,7 @@
 <script type="text/javascript" src="../resources/js/qun.js"></script>
 </head>
 <body>
+	<div id="test"></div>
 	<script type="text/javascript">
 		
 		/*dove("qun.lang.Object", function(Object){
@@ -15,12 +16,16 @@
 		});*/
 	
 		
-		req("qun.lang.Util", function(util){
+		/*req("qun.lang.Util", function(util){
 			//console.log(ViewController.STATES());
 			
 			console.log(util.tmpl);
 			
 			
+		});*/
+		req("qun.lang.View", function(View){
+			var v = new View("test");
+			console.log(v);
 		});
 		
 		/*qun.config({

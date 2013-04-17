@@ -44,7 +44,8 @@
 			SYNTHESIZE : "@synthesize",
 			SUPERCLASS : "@superclass",
 			CLASSNAME : "@name",
-			NATIVE : /^[^{]+\{\s*\[native code/
+			NATIVE : /^[^{]+\{\s*\[native code/,
+			SUPPORT_CLASS_LIST : "classList" in document.documentElement
 	};
 
 	qun.Utils = {
@@ -504,12 +505,13 @@
 		f.prototype = proto;
 		//crack public and static
 		qun.Utils.crackPublicAndStatic(f);
-		//cache the construct class
-		proto._class = f;
 		//add name if specified
 		if(className){
 			qun.Utils.set(className, f);
 		}
+		//cache the construct class
+		proto._class = f;		
+		f._meta.itself = f;
 		//push synthesize properties
 		qun.Class.synthesizes.push(f);
 		//return function
@@ -625,5 +627,9 @@
 
 	window.req = req;
 	window.def = def;
+	window.qun = {
+		Utils : qun.Utils,
+		CONST : qun.CONST
+	};
 	//win["@"] = _qun;
 })(window);
