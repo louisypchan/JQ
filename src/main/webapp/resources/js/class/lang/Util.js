@@ -6,8 +6,54 @@ def(function(){
 		"+VIEW_DID_APPEAR"     : "view-did-appear",
 		"+VIEW_WILL_DISAPPEAR" : "view-will-disappear",
 		"+VIEW_DID_DISAPPEAR"  : "view-did-disappear",
-		
-		
+		"+TRANSITION" : {
+			"IN_FROM_LEFT" : {
+				props : ["transform"],
+				from : ["translateX(-100%)"],
+				to : ["translateX(0)"]
+			},
+			"OUT_TO_LEFT" : {
+				props : ["transform"],
+				from : ["translateX(0)"],
+				to : ["translateX(-100%)"]
+			},
+			"OUT_TO_RIGHT" : {
+				props : ["transform"],
+				from : ["translateX(0)"],
+				to : ["translateX(100%)"]
+			},
+			"IN_FROM_RIGHT" : {
+				props : ["transform"],
+				from : ["translateX(100%)"],
+				to : ["translateX(0)"]				
+			},
+			"FADE_OUT" : {
+				props : ["opacity"],
+				from : [1],
+				to : [0]				
+			},
+			"FADE_IN" : {
+				props : ["opacity"],
+				from : [0],
+				to : [1]				
+			}
+		},
+		"-registeredViewClass" : {},
+		"-registerViewClass" : function(view){
+			this.registeredViewClass[view.baseCSSClass] = view;
+		},
+		/**
+		 * short for translate
+		 */
+		"-t": function(x, y){
+			return this.t3d(x, y , 0);
+		},
+		/**
+		 * translate3d
+		 */
+		"-t3d" : function(x, y, z){
+			
+		},
 		/**
 		 * see dojo foundation string.subsitute
 		 * extends it to support Array ${nls.arr[0]}

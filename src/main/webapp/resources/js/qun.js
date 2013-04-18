@@ -48,6 +48,24 @@
 			SUPPORT_CLASS_LIST : "classList" in document.documentElement
 	};
 
+	
+	
+	/**
+	 * To fix the bug of float number
+	 */
+	function roundTo(num, unit){
+		if(0 > unit) return num;
+		unit = Math.pow(10, unit);
+		return Math.round(num * unit) / unit;
+	};
+	
+	function addZeros(){
+		var num = arguments[0], decimalSeparator = arguments[1], precision = arguments[2];
+		num = num.split(decimalSeparator);
+		void 0 == num[1] && precision > 0 && (num[1] == "0");
+		return num[1].length < precision ? (num[1] += "0", addZeros(num[0] + decimalSeparator + num[1], decimalSeparator, precision)) : void 0 != num[1] ? num[0] + decimalSeparator + num[1] : num[0];
+	};
+	
 	qun.Utils = {
 			/**
 			 * 
@@ -283,6 +301,39 @@
 			},
 			uniqueId : function(){
 				return "qun-" + new Date().getTime();
+			},
+			
+			/**
+			 * consider toFixed is the same usage of the method "toFixed" in Number, but custom and enhance here
+			 * @param num
+			 * @param format  { precision : 2, decimalSeparator : ".", thousandsSeparator : "," }
+			 */
+			toFixed : function(num, format){
+				num = roundTo(num,format.precision);
+				var decimalSeparator = format.decimalSeparator,
+				thousandsSeparator = format.thousandsSeparator,
+				isMinus = 0 > num ? '-' : '',
+						num = Math.abs(num),
+						numStr = num.toString();
+				if(numStr.indexOf('e') == -1){
+					for(var numArr = numStr.split(decimalSeparator), i = "", k = numArr[0].toString(), j = k.length; 0 <= j; j -= 3){
+						i = j != k.length ? 0 != j ? k.substring(j - 3, j) + thousandsSeparator + i : k.substring(j - 3, j) + i : k.substring(j - 3, j);       
+					}
+					numArr[1] && (i = i + decimalSeparator + numArr[1]);
+					format.precision > 0 && "0" != i && (i = addZeros(i,decimalSeparator,format.precision));
+				} else{
+					i = h;
+				} 
+				i = isMinus + i;
+				return i - 0; 
+			},
+			sanitizeNumber : function(){
+				var args = arguments, l = args.length, i = 0;
+				for(; i < l; i++){
+					if(typeof args[i] == "number"){
+						args[i] = qun.Utils.toFixed(args[i] - 0, {precision : 20, decimalSeparator : ".", thousandsSeparator : ","});
+					}
+				}
 			}
 	};
 	/**
