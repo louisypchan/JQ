@@ -1,5 +1,5 @@
 def(function(){
-	
+	var iOS = navigator.userAgent.match(/OS ([0-9_]+)/);
 	var f = declare({
 		"@name" : "qun.lang.Util",
 		"+VIEW_WILL_APPEAR"    : "view-will-appear",
@@ -25,7 +25,7 @@ def(function(){
 			"IN_FROM_RIGHT" : {
 				props : ["transform"],
 				from : ["translateX(100%)"],
-				to : ["translateX(0)"]				
+				to : ["translateX(0)"]
 			},
 			"FADE_OUT" : {
 				props : ["opacity"],
@@ -37,6 +37,15 @@ def(function(){
 				from : [0],
 				to : [1]				
 			}
+		},
+		"+DEVICE" : {
+			"iOS" : iOS,
+			"iOS_VERSION" : iOS ? iOS[1].replace(/_/g,"") : null,
+			"IS_IPAD" : navigator.platform.indexOf("iPad") > -1,
+			"HAS_HIDPI_DISPLAY" : window.devicePixelRatio >= 2
+		},
+		"+VIEW_PROPS" : {
+			
 		},
 		"-registeredViewClass" : {},
 		"-registerViewClass" : function(view){
@@ -52,7 +61,47 @@ def(function(){
 		 * translate3d
 		 */
 		"-t3d" : function(x, y, z){
-			
+			qun.Utils.sanitizeNumber(arguments);
+			return "translate3d(" + x + "px, " + y + "px, " + z + "px)";
+		},
+		"-tm" : function(x, y){
+			qun.Utils.sanitizeNumber(arguments);
+			return "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, " + x + ", " + y + ", 0, 1)";
+		},
+		/**
+		 * 
+		 * @param str
+		 * @returns {WebKitCSSMatrix}
+		 */
+		"-matrixFromString" : function(str){
+			var matrix = "";
+			if(str.length > 0 && str != "none"){
+				matrix = str.replace(/([^(]*)\(([^)]*)\)/g,function($0, $1, $2){
+					$0 = $2.replace(/(\-?[0-9.]+(?:e\-?[0-9]+)?)([^,]*)/g, function(_1,_2,_3){ //f,g,h
+						_2 = parseFloat(_2);
+						return qun.Utils.toFixed(_2, {precision : 6, decimalSeparator : ".", thousandsSeparator : ","}) + _3;
+					});
+					return _2 + "(" + $0 + ")";
+				});
+			}
+			return new WebKitCSSMatrix(matrix);
+		},
+		/**
+		 * 
+		 * @param m1
+		 * @param m2
+		 * @returns {Boolean}
+		 */
+		"-matrixEqualsToMatrix" : function(m1, m2){
+			for(var i = 1; i <= 4; i++){
+				for(var j = 1; j <= 4; j++){
+					var tmp = "m" + i + j;
+					if(m1[tmp] !== m2[tmp]){
+						return false;
+					}
+				}
+			}
+			return true;
 		},
 		/**
 		 * see dojo foundation string.subsitute
