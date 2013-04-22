@@ -8,7 +8,7 @@ def(["qun.lang.Object",
 
 		"@name" : "qun.lang.View",
 
-		"@synthesize" : ["id","zIndex","opacity","size","position", "clipsToBounds", "doubleSided", "hidden", "transform"],
+		"@synthesize" : ["id","zIndex","opacity","size","position", "anchorPoint", "anchorPointZ", "clipsToBounds", "doubleSided", "hidden", "transform"],
 
 		"+baseCSSClass" : "jqmView",
 
@@ -24,6 +24,7 @@ def(["qun.lang.Object",
 			this.autoresizeBacking = true; // will auto reisze all the subviews when the superview is changed
 			this._position = new Point();
 			this._size = new Size();
+			this._anchorPoint = new Point(0.5, 0.5);
 			this._zIndex = 0;
 			this._opacity = 1;
 			this._transform = "none";
@@ -52,6 +53,7 @@ def(["qun.lang.Object",
 			
 			this.addObserver("subViewsIndexInSuperView", this, "subViewsIndexChanged");
 			this.addObserver("layerStyle", this, "layerStyleChanged");
+			this.addObserver("anchorPoint", this, "updateTransformOrgin");
 		},
 
 		/**
@@ -131,7 +133,7 @@ def(["qun.lang.Object",
 		 * add subview
 		 */
 		addSubView : function(view){
-			
+			this.insertSubViewAtIndex(view, this.subviews.length);
 		},
 		/**
 		 * remove subview
@@ -183,14 +185,57 @@ def(["qun.lang.Object",
 				var currentSize = this._size.copy();
 				this._size = size;
 				this.notifyPropChange("layerStyle", [{width : size.width, height : size.height}]);
-				this.autoresizeBacking && this.resizeSubViews();
+				this.autoresizeBacking && this.resizeSubViews(currentSize);
 			}
 		},
 		/**
 		 * 
 		 */
+		setAnchorPoint : function(anchorPoint){
+			if(anchorPoint){
+				this._anchorPoint = anchorPoint;
+				this.notifyPropChange("anchorPoint");
+			}
+		},
+		setAnchorPointZ : function(anchorPointZ){
+			this._anchorPointZ = anchorPointZ;
+			this.notifyPropChange("anchorPoint");
+		},
+		setDoubleSided : function(doubleSided){
+			this._doubleSided = doubleSided;
+			this.notifyPropChange("layerStyle", [{ "-webkit-backface-visibility" : doubleSided ? "visible" : "hidden"}]);
+		},
+		setZIndex : function(zIndex){
+			this._zIndex = zIndex;
+			this.notifyPropChange("layerStyle", [{ "z-index" : zIndex }]);			
+		},
+		setHidden : function(hidden){
+			this._hidden = hidden;
+			this.notifyPropChange("layerStyle", [{ "visibility" : hidden ? "hidden" : "visible", "display" : hidden ? "none" : "block"}]);
+		},
+		setClipsToBounds : function(clipsToBounds){
+			this._clipsToBounds = clipsToBounds;
+			this.notifyPropChange("layerStyle", [{ "overflow" : clipsToBounds ? "hidden" : "visible" }]);
+		},
+		setOpacity : function(opacity){
+			this._opacity = opacity;
+			this.notifyPropChange("layerStyle", [{ "opacity" : opacity }]);
+		},
+		setPosition : function(position){
+			if(position && !this._position.equals(position)){
+				this._position = position;
+				this.updatePositionAndTransform();
+			}
+		},
+		setTransform : function(transform){
+			this._transform = transform;
+			this.updatePositionAndTransform();
+		},
+		/**
+		 * 
+		 */
 		resizeSubViews : function(size){
-			
+			//TODO:
 		},
 		subViewsIndexChanged : function(index){
 			index = index || 0;
@@ -202,6 +247,12 @@ def(["qun.lang.Object",
 			for(var name in styles){
 				this.layer.style.setProperty(name, styles[name]);
 			}
+		},
+		updateTransformOrgin : function(){
+			var x = this._anchorPoint.x * 100, y = this._anchorPoint.y * 100, z = this._anchorPointZ;
+			this.notifyPropChange("layerStyle", [{
+				 "-webkit-transform-origin" : Math.round(x) + "% " + Math.round(y) + "% "+ z + "px"
+			}]);
 		},
 		willRemoveSubView : function(){},
 		willMoveToSuperview : function(){},

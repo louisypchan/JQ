@@ -45,7 +45,22 @@ def(function(){
 			"HAS_HIDPI_DISPLAY" : window.devicePixelRatio >= 2
 		},
 		"+VIEW_PROPS" : {
-			
+			"AUTORESIZING" : {
+				"LEFT_MARGIN" : 1,
+				"WIDTH" : 2,
+				"RIGHT_MARGIN" : 4,
+				"TOP_MARGIN" : 8,
+				"HEIGHT" : 16,
+				"BOTTOM_MARGIN" : 32 //the height of safari status bar
+			},
+			"MAPPING" : {
+				opacity : "opacity",
+				transform : "-webkit-transform",
+				position : "-webkit-transform",
+				anchorPoint : "-webkit-transform-origin",
+				doubleSized : "-webkit-backface-visibility",
+				zIndex : "z-index"
+			}
 		},
 		"-registeredViewClass" : {},
 		"-registerViewClass" : function(view){
