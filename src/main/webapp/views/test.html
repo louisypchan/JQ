@@ -10,6 +10,12 @@
 	<div id="test"></div>
 	<script type="text/javascript">
 		
+		req("qun.lang.View", function(View){
+			console.log(View);
+			var v = new View("#test");
+			console.log(v);
+		});
+	
 		/*dove("qun.lang.Object", function(Object){
 			
 			console.log(Object);

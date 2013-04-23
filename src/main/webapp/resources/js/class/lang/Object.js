@@ -36,7 +36,7 @@ def(function(){
 		notifyPropChange : function(name, args){
 			var observedprop = this.observedprops[name];
 			if(observedprop){
-				qun.Utils.hook(observedprop.scope, observedprop.method, args);
+				qun.Utils.hook(observedprop.scope, observedprop.method, args)();
 			}
 		}
 	});

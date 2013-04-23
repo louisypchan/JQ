@@ -108,7 +108,16 @@
 			 */
 			objectHasMethod : function(object, method){
 				return object != null && object[method] !== undefined && this.isFunction(object[method]);
-			},		
+			},
+			/**
+			 * 
+			 * @param a
+			 * @param b
+			 * @returns {Boolean}
+			 */
+			objectIsInstanceOfClass : function(a, b){
+				return b != null && a instanceof b;
+			},
 			/**
 			 * 
 			 * @param it
@@ -158,10 +167,36 @@
 				}
 				return rs;
 			},
+			/**
+			 * 
+			 * @param name
+			 * @param value
+			 * @param context
+			 * @returns
+			 */
 			set : function(name, value, context){
 				var parts = name.split("."), p = parts.pop(), obj = qun.Utils.getProp(parts, true, context);
 				return obj && p ? (obj[p] = value) : undefined;
-			},		
+			},
+			/**
+			 * 
+			 * @param target
+			 * @param source
+			 * @returns
+			 */
+			mixin : function(target, source){
+				var name, t;
+				for(name in source){
+					t = source[name];
+					target[name] = t;
+				}
+				for(var i = extraNames.length; i;){
+					name = extraNames[--i];
+					t = source[name];
+					target[name] = t;
+				}
+				return target;
+			},
 			/**
 			 * 
 			 * @param target
@@ -271,7 +306,7 @@
 			 * @returns
 			 */
 			hook : function(scope, method, /*Array*/args){
-				var args = arguments.length, arity = args.length;
+				var _args = arguments.length, arity = _args.length;
 				if(arity > 2){
 					//Todo
 					var named = qun.Utils.isString(method);
@@ -296,9 +331,17 @@
 				}
 				return !scope ? method : function() { return method.apply(scope, args||[]); };
 			},
+			/**
+			 * 
+			 * @param msg
+			 */
 			makeErr : function(msg){
 				throw(msg);
 			},
+			/**
+			 * 
+			 * @returns {String}
+			 */
 			uniqueId : function(){
 				return "qun-" + new Date().getTime();
 			},
@@ -327,11 +370,59 @@
 				i = isMinus + i;
 				return i - 0; 
 			},
+			/**
+			 * 
+			 */
 			sanitizeNumber : function(){
 				var args = arguments, l = args.length, i = 0;
 				for(; i < l; i++){
 					if(typeof args[i] == "number"){
 						args[i] = qun.Utils.toFixed(args[i] - 0, {precision : 20, decimalSeparator : ".", thousandsSeparator : ","});
+					}
+				}
+			},
+			transaction : {
+				transitions : [],
+				openTransactons : [],
+				defaults : {},
+				defaultsStates : [],
+				begin : function(){
+					if(this.openTransactons == 0){
+						this.transitions = [];
+						this.defaults = {};
+					}else{
+						var state = qun.Utils.mixin({}, this.defaults);
+						this.defaultsStates.push(state);
+						state = null;
+					}
+					this.openTransactons++;
+				},
+				addTransition : function(t){
+					for(var name in this.defaults){
+						if(t[name] == null){
+							t[name] = this.defaults[name];
+						}
+						this.transitions.push(t);
+					}
+				},
+				commit : function(){
+					if(this.openTransactons != 0){
+						this.openTransactons--;
+						if(this.openTransactons != 0){
+							this.defaults = this.defaultsStates.pop();
+						}else{
+							for(var t = this.transitions, i = 0, l = t.length; i < l; i++){
+								t[i].applyFromState();
+							}
+							var f = function(){
+								for(; t.length;){
+									t.pop().applyToState();
+								}
+							};
+							//workarounds for android
+							//
+							setTimeout(f, 0);
+						}
 					}
 				}
 			}

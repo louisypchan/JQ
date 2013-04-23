@@ -119,6 +119,25 @@ def(function(){
 			return true;
 		},
 		/**
+		 * 
+		 */
+		"-concatTransforms" : function(){
+			for(var a = [], i = 0, l = arguments.length; i < l; i++){
+				var arg = arguments[i];
+				arg && arg != "none" && a.push(arg);
+			}
+			return a.join(" ");
+		},
+		/**
+		 * 
+		 * @param value
+		 * @returns {Number}
+		 */
+		"-roundedPxValue" : function(value){
+			var pixelRatio = window.devicePixelRatio;
+			return (pixelRatio * value | 0) / pixelRatio;
+		},
+		/**
 		 * see dojo foundation string.subsitute
 		 * extends it to support Array ${nls.arr[0]}
 		 */

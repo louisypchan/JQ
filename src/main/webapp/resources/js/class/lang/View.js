@@ -8,13 +8,12 @@ def(["qun.lang.Object",
 
 		"@name" : "qun.lang.View",
 
-		"@synthesize" : ["id","zIndex","opacity","size","position", "anchorPoint", "anchorPointZ", "clipsToBounds", "doubleSided", "hidden", "transform"],
+		"@synthesize" : ["id","zIndex","opacity","size","position", "anchorPoint", "anchorPointZ", "clipsToBounds", "doubleSided", "hidden", "transform", "transitionEnabled", "transitionDuration", "wantsAccelerometerBacking"],
 
 		"+baseCSSClass" : "jqmView",
 
 		"self" : function(/*String|DOMObject*/layer){
 			this.callSuper();
-			console.log(qun);
 			if(qun.Utils.isString(layer)){
 				layer = document.querySelector(layer);
 			}
@@ -33,6 +32,7 @@ def(["qun.lang.Object",
 			this._layerIsInDocument = false;
 			this._declarativeBacking = false;
 			this._transitionEnabled = this._wantsAccelerometerBacking = false;
+			this._transitionDuration = 0.5; //default transition duration
 			this.gestureRecognizers = []; //TODO
 
 			if(layer instanceof Element){
@@ -147,6 +147,16 @@ def(["qun.lang.Object",
 				this.notifyPropChange("subViewsIndexInSuperView", [viewIndex]);
 			}
 		},
+		removeFromSuperview : function(){
+			if(this.superview != null){
+				this.willMoveToSuperview(null);
+				this.superview.removeSubView(this);
+				this.layer.parentNode.removeChild(this.layer);
+				this.superview = null;
+				this.didMoveToSuperview();
+				this.notificationOfViewRemoved();
+			}
+		},
 		/**
 		 * add subview according to the index passed in
 		 */
@@ -176,8 +186,23 @@ def(["qun.lang.Object",
 					view.didMoveToSuperview();
 				}
 				this.didAddSubView(view);
-				this._layerIsInDocument && !view._layerIsInDocument && view.readLayersProps();
+				this._layerIsInDocument && !view._layerIsInDocument && view.notificationOfViewInserted();
 			}
+		},
+		
+		notificationOfViewInserted : function(){
+			for(var subviews = this.subviews, i = 0, l = subviews.length; i < l; i++){
+				subviews[i].notificationOfViewInserted();
+			}
+			this.readLayersProps();
+			this._layerIsInDocument = true;
+		},
+		
+		notificationOfViewRemoved : function(){
+			for(var subviews = this.subviews, i = 0, l = subviews.length; i < l; i++){
+				subviews[i].notificationOfViewRemoved();
+			}
+			this._layerIsInDocument = false;			
 		},
 		
 		setSize : function(size){
@@ -230,6 +255,32 @@ def(["qun.lang.Object",
 		setTransform : function(transform){
 			this._transform = transform;
 			this.updatePositionAndTransform();
+		},
+		setTransitionEnabled : function(enabled){
+			this.notifyPropChange("layerStyle", [{ "-webkit-transition-duration" : enabled ? this._transitionDuration + "s" : "0s"}]);
+			this._transitionEnabled = enabled;
+			this.updatePositionAndTransform();
+		},
+		setTransitionDuration : function(duration){
+			this.notifyPropChange("layerStyle", [{ "-webkit-transition-duration" : duration + "s"}]);
+			this._transitionDuration = duration;
+		},
+		setWantsAccelerometerBacking : function(accelerometerBacking){
+			if(this._wantsAccelerometerBacking != accelerometerBacking){
+				this._wantsAccelerometerBacking = accelerometerBacking;
+				this.updatePositionAndTransform();
+			}
+		},
+		updatePositionAndTransform : function(){
+			this._wantsAccelerometerBacking || this._transitionEnabled ? this.notifyPropChange("layerStyle",[{
+				"left" : "0",
+				"right" : "0",
+				"-webkit-transform" : Util.concatTransforms(Util.tm(Util.roundedPxValue(this._position.x), Util.roundedPxValue(this._position.y)), this._transform)
+			}]) : this.notifyPropChange("layerStyle", [{
+				"left" : this._position.x + "px",
+				"right" : this._position.y + "px",
+				"-webkit-transform" : this._transform
+			}]);
 		},
 		/**
 		 * 
