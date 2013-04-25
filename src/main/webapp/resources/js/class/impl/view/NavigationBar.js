@@ -2,14 +2,13 @@ def(["qun.lang.View","qun.lang.Util"], function(View, Util){
 	
 	return declare({
 		"@superclass" : View,
-		"@name" : "qun.impl.NavigationBar",
+		"@name" : "qun.impl.view.NavigationBar",
 		"@synthesize" : ["items"],
 		
-		"+baseCSSClass" : "jqm-navigation-bar",
+		"+baseCSSClass" : "jqmNavigationBar",
 		
 		"self" : function(layer){
-			this.delegate = null;
-			this._items = [];
+			
 		}
 	});
 });

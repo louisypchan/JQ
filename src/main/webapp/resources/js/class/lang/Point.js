@@ -7,7 +7,6 @@ def(["qun.lang.Object"], function(Object){
 		
 		
 		"self" : function(x,y){
-			this.callSuper();
 			this.x = x!=null && !isNaN(x) ? x : 0;
 			this.y = y!=null && !isNaN(y) ? y : 0;
 		},

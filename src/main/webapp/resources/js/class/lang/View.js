@@ -9,11 +9,13 @@ def(["qun.lang.Object",
 		"@name" : "qun.lang.View",
 
 		"@synthesize" : ["id","zIndex","opacity","size","position", "anchorPoint", "anchorPointZ", "clipsToBounds", "doubleSided", "hidden", "transform", "transitionEnabled", "transitionDuration", "wantsAccelerometerBacking"],
-
+		
+		"+archivedProps" : ["id", "position", "size", "zIndex", "opacity", "clipsToBounds", "hidden"],
+		
 		"+baseCSSClass" : "jqmView",
 
 		"self" : function(/*String|DOMObject*/layer){
-			this.callSuper();
+			console.log("View");
 			if(qun.Utils.isString(layer)){
 				layer = document.querySelector(layer);
 			}
@@ -37,14 +39,15 @@ def(["qun.lang.Object",
 
 			if(layer instanceof Element){
 				if(document.body.contains(this.layer)){
-					//#TODO
+					//#TODO : implement for declarative backing
 					if(this._declarativeBacking){
 						this.parseViewsInLayer();
 					}
-					this._layerIsInDocument = true;
 					this.readLayersProps(this.layer);
+					this.setupLayerCSS();
+					this._layerIsInDocument = true;
 				}
-			}else if(this.layer === undefined){
+			}else{
 				this.createLayer();
 				this.setupLayerCSS();
 				this.layerWasCreated();				
@@ -207,9 +210,9 @@ def(["qun.lang.Object",
 		
 		setSize : function(size){
 			if(size && !this._size.equals(size)){
-				var currentSize = this._size.copy();
+				var currentSize = this._size.clone();
 				this._size = size;
-				this.notifyPropChange("layerStyle", [{width : size.width, height : size.height}]);
+				this.notifyPropChange("layerStyle", [{width : size.width + "px", height : size.height + "px"}]);
 				this.autoresizeBacking && this.resizeSubViews(currentSize);
 			}
 		},
@@ -273,8 +276,8 @@ def(["qun.lang.Object",
 		},
 		updatePositionAndTransform : function(){
 			this._wantsAccelerometerBacking || this._transitionEnabled ? this.notifyPropChange("layerStyle",[{
-				"left" : "0",
-				"right" : "0",
+				"left" : "0px",
+				"right" : "0px",
 				"-webkit-transform" : Util.concatTransforms(Util.tm(Util.roundedPxValue(this._position.x), Util.roundedPxValue(this._position.y)), this._transform)
 			}]) : this.notifyPropChange("layerStyle", [{
 				"left" : this._position.x + "px",

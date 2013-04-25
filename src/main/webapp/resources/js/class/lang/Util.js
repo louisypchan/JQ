@@ -1,4 +1,5 @@
-def(function(){
+def(["qun.lang.Object"], function(Object){
+	//TODO: android consider??
 	var iOS = navigator.userAgent.match(/OS ([0-9_]+)/);
 	var f = declare({
 		"@name" : "qun.lang.Util",
@@ -62,6 +63,117 @@ def(function(){
 				zIndex : "z-index"
 			}
 		},
+		"-Archiver" : {
+			"_uid" : 1,
+			"objectReferences" : {},
+			"WILL_ENCODE_OBJECT" : "willEncodeObjectToArchive",
+			"DID_ENCODE_OBJECT" : "didEncodeObjectToArchive",
+			"WILL_RESTORE_OBJECT" : "willRestoreFromArchive",
+			"DID_RESTORE_OBJECT" : "didRestoreFromArchive"
+		},
+		//TODO: multipule parents supportive
+		"-archive" : function(source, target){
+			if(!target){
+				target = {};
+				return {
+					__root : this.archive(source, target),
+					__objects : target
+				};
+			}
+			if(qun.Utils.isPrimitive(source)){ 
+				return source; 
+			}else if(qun.Utils.isArray(source)){
+				return source.map(function(i){
+					return this.archive(i);
+				}, this);
+			}
+			var uid = source._uid || (source._uid = this.Archiver._uid++), map, name;
+			if(!target[uid]){
+				map = target[uid] = {};
+				if(qun.Utils.objectIsInstanceOfClass(source, Object)){
+					var it = source._class;
+					map._className = it._name;
+					it = this.archivePropsForClass(it);
+					qun.Utils.objectHasMethod(source, this.Archiver.WILL_ENCODE_OBJECT) && source[this.Archiver.WILL_ENCODE_OBJECT](map);
+					for(name in it){
+						map[name] = this.archive(source.archiveProp(name), target);
+					}
+					qun.Utils.objectHasMethod(source, this.Archiver.DID_ENCODE_OBJECT) && source[this.Archiver.DID_ENCODE_OBJECT](map);
+				}else{
+					for(x in source){
+						if(name != "_uid"){
+							map[name] = this.archive(source[name], target);
+						}
+					}
+				}
+			}
+			return {
+				_uid : uid
+			};
+		},
+		//TODO: multipule parents supportive
+		"-archivePropsForClass" : function(it){
+			var archivePropMap = it._archivePropMap;
+			if(archivePropMap) return archivePropMap;
+			archivePropMap = it._archivePropMap = {};
+			var superclass = it._meta ? it._meta.super : null;
+			//console.log(superclass ? superclass._name : null);
+			superclass && qun.Utils.mixin(this.archivePropsForClass(superclass), archivePropMap);
+			var archivedProps = it.archivedProps || [];
+			for(var i = 0, l = archivedProps.length; i < l; i++){
+				archivePropMap[archivedProps[i]] = true;
+			}
+			var excludedProps = it.excludedProps || [];
+			for(i = 0, l = excludedProps.length; i < l; i++){
+				delete archivePropMap[excludedProps[i]];
+			}
+			return archivePropMap;
+		},
+		//TODO: multipule parents supportive
+		"-archiveToString" : function(it){
+			return JSON.stringify(this.archive(it));
+		},
+		//TODO: multipule parents supportive
+		restoreArchive : function(source, target, dict){
+			if(qun.Utils.isPrimitive(source)){
+				return source;
+			}else if(source.__root){
+				return this.restoreArchive(source.__root, source.__objects, {});
+			}else if(source._uid){
+				var uid = source._uid;
+				return dict[uid] || (dict[uid] = this.restoreArchive(target[uid], target, dict));
+			}else if(qun.Utils.isArray(source)){
+				return source.map(function(i){
+					return this.restoreArchive(i, target, dict);
+				}, this);
+			}else{
+				var rs = {};
+				for(var name in source){
+					if(name != "_className"){
+						rs[name] = this.restoreArchive(source[name], target, dict);
+					}
+				}
+				if(source._className){
+					var cls = qun.Utils.getProp(source._className.split(".")), _class = cls, m;
+					do{
+						m = _class.restoreArchive;
+					}while(!m && (_class = _class._meta ? _class._meta.super : null));
+					cls = m ? m.call(cls, rs) : new cls;
+					qun.Utils.objectHasMethod(source, this.Archiver.WILL_RESTORE_OBJECT) && source[this.Archiver.WILL_RESTORE_OBJECT](source);
+					for(name in rs){
+						cls.restoreProp(name, rs[name]);
+					}
+					qun.Utils.objectHasMethod(source, this.Archiver.DID_RESTORE_OBJECT) && source[this.Archiver.DID_RESTORE_OBJECT](source);
+					return cls;
+				}else{
+					return rs;
+				}				
+			}
+		},
+		//TODO: multipule parents supportive
+		"-restoreWithJSON" : function(it){
+			return it ? this.restoreArchive(JSON.parse(it)) : null;
+		},	
 		"-registeredViewClass" : {},
 		"-registerViewClass" : function(view){
 			this.registeredViewClass[view.baseCSSClass] = view;
@@ -193,11 +305,11 @@ def(function(){
 		"-removeClass" : function(it, className){
 			var exist = this.itHasClassName(it, className);
 			if(qun.CONST.SUPPORT_CLASS_LIST){
-				if(!exist){
+				if(exist){
 					it.classList.remove(className);
 				}
 			}else{
-				if(!exist){
+				if(exist){
 					it.className = it.className.replace(RegExp("(?:^|\\s+)" + className + "(?:\\s+|$)"), " ");
 				}
 			}			

@@ -38,6 +38,12 @@ def(function(){
 			if(observedprop){
 				qun.Utils.hook(observedprop.scope, observedprop.method, args)();
 			}
-		}
+		},
+		archiveProp : function(prop){
+			return this[prop];
+		},
+		restoreProp : function(prop, value){
+			this[prop] = value;
+		}	
 	});
 });

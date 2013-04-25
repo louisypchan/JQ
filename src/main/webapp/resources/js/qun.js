@@ -102,6 +102,14 @@
 			},
 			/**
 			 * 
+			 * @param it
+			 * @returns {Boolean}
+			 */			
+			isPrimitive : function(it){
+				return it == null || typeof it == "number" || typeof it == "boolean" || this.isString(it);
+			},
+			/**
+			 * 
 			 * @param object
 			 * @param method
 			 * @returns {Boolean}
@@ -288,7 +296,7 @@
 				return it;
 			},
 			crackPublicAndStatic : function(it){
-				var t = new it, name, src;
+				var t = it.prototype, name, src;
 				for(name in t){
 					if(qun.Utils.isPublicAndStatic(name)){
 						src = t[name];
@@ -313,6 +321,7 @@
 					return function(){
 						//locate method
 						var f = named ? (scope||window)[method] : method;
+						//console.log(args);
 						return f && f.apply(scope||window, args.concat(arguments));
 					};
 				}
@@ -515,6 +524,7 @@
 		});		
 	},
 	callSuperImpl = function(){
+		//console.log("callSuperImpl");
 		var caller = callSuperImpl.caller, name = caller._name,
 		meta = this._class._meta, p, _super;
 		if(meta.super){
@@ -584,6 +594,32 @@
 			return res;
 		}
 	};
+	
+	/**
+	  * TO be updated
+	  */
+	var _analyse = function(supcls, ctor){
+		if(qun.Utils.isFunction(supcls)){
+			if(supcls._meta){
+				ctor.unshift(supcls._meta.constructor);
+				supcls = supcls._meta.super ? supcls._meta.super : null;
+				_analyse(supcls, ctor);
+			}
+					
+		}else if(qun.Utils.isArray(supcls)){
+			//TODO: to be well tested
+			var t = supcls.slice(0), base;
+			t = mro_c3(t);
+			for(var i = 0, base, l = t.length;  i < l; i++){
+				base = t[i];
+				if(base._meta){
+					ctor = ctor.concat(base._meta.constructor);
+				}
+			}			
+		}else{
+			return;
+		}
+	};
 
 	/**
 	 * 
@@ -591,19 +627,21 @@
 	 * @returns
 	 */
 	qun.Class = function(it){
-		var superclass = it[qun.CONST.SUPERCLASS], p = "safeMixin", proto = {}, className  = it[qun.CONST.CLASSNAME], constructor=[], mro = [];
+		var superclass = it[qun.CONST.SUPERCLASS], p = "safeMixin", proto = {}, className  = it[qun.CONST.CLASSNAME], constructor = [];
 		if(superclass){
 			//
+			var _superclass = superclass;
 			if(qun.Utils.isFunction(superclass)){
 				//force new
 				aF.prototype = superclass.prototype;
 				proto = new aF;
 				//clean up
 				aF.prototype = null;
-				if(superclass._meta){
+				/*if(superclass._meta){
 					constructor = constructor.concat(superclass._meta.constructor);
-				}
+				}*/
 			}else if(qun.Utils.isArray(superclass)){
+				//TODO: To be tested
 				t = superclass.slice(0);
 				t = mro_c3(t);
 				for(var i = 0, base, l = t.length;  i < l; i++){
@@ -611,13 +649,15 @@
 					aF.prototype = base.prototype;
 					qun.Utils.safeMixin(proto, new aF);
 					aF.prototype = null;
-					if(base._meta){
+					/*if(base._meta){
 						constructor = constructor.concat(base._meta.constructor);
-					}
+					}*/
 				}
 
-			}
+			}						
+			_analyse(_superclass, constructor);
 			p = "extend";
+			_superclass = null;
 		}
 		//add all properties
 		qun.Utils[p](proto, it);
@@ -631,6 +671,7 @@
 			return function(){
 				f.executed || qun.Class.processSynthesize();
 				if(ctor){
+					//console.log(ctor);
 					for(var i = 0, l = ctor.length; i < l; i++){
 						ctor[i] && ctor[i].apply(this, arguments);
 					}
@@ -647,15 +688,18 @@
 		f.prototype = proto;
 		//crack public and static
 		qun.Utils.crackPublicAndStatic(f);
+		//cache the construct class
+		proto._class = f;
+		//proto.constructor = f;		
+		//f._meta.itself = f;
+		//push synthesize properties
+		qun.Class.synthesizes.push(f);
 		//add name if specified
 		if(className){
 			qun.Utils.set(className, f);
-		}
-		//cache the construct class
-		proto._class = f;		
-		f._meta.itself = f;
-		//push synthesize properties
-		qun.Class.synthesizes.push(f);
+			proto._class._name = className;
+			f._name = className; //Just for testing
+		}	
 		//return function
 		return f;
 	};

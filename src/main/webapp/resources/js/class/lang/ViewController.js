@@ -8,7 +8,6 @@ def(["qun.lang.Object","qun.lang.Util","qun.lang.View"], function(Object, Util, 
 		"@synthesize" : ["view"],	
 		
 		"self" : function(layer){
-			this.callSuper();
 			this.configuration = {};
 			if(qun.Utils.isString(layer)){
 				this.configuration = { id :  layer};
