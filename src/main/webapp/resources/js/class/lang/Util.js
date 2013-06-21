@@ -63,6 +63,13 @@ def(["qun.lang.Object"], function(Object){
 				zIndex : "z-index"
 			}
 		},
+		"+NavBar_PROPS" : {
+			"DEFAULT_HEIGHT" : 44,
+			"WILL_PUSH_ITEM" : "navigationBarWillPushItem",
+			"DID_PUSH_ITEM" : "navigationBarDidPushItem",
+			"WILL_POP_ITEM" : "navigationBarWillPopItem",
+			"DID_POP_ITEM"	: "navigationBarDidPopItem"
+		},
 		"-Archiver" : {
 			"_uid" : 1,
 			"objectReferences" : {},

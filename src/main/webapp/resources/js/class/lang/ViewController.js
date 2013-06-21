@@ -5,7 +5,7 @@ def(["qun.lang.Object","qun.lang.Util","qun.lang.View"], function(Object, Util, 
 		
 		"@name" : "qun.lang.ViewController",
 		
-		"@synthesize" : ["view"],	
+		"@synthesize" : ["view", "title", "contentView"],	
 		
 		"self" : function(layer){
 			this.configuration = {};
@@ -31,20 +31,34 @@ def(["qun.lang.Object","qun.lang.Util","qun.lang.View"], function(Object, Util, 
 			
 			//
 			this.viewLoadingDelaysTransition = true;
-			
-			
+			//
+			this.viewWasArchived = this.viewIsLoaded = false;
 		},
-		
+		//
 		getView : function(){
+			/*if(this._view) return this._view;
+			if(this.viewWasArchived){
+				
+			}*/
 			return this._view ? this._view : this.loadView();
 		},
 		
 		setView : function(view){
-			
+			this._view instanceof View && delete this._view._viewController;
+			if(view == null){
+				//unload view
+			}else{
+				view._viewController = this;
+				this._view = view;
+			}
 		},
 		
 		loadView : function(){
 			this.view = new View();
+		},
+		
+		unloadView : function(){
+			
 		},
 		
 		viewWillAppear : function(){

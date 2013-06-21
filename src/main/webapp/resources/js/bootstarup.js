@@ -6,6 +6,7 @@ window.addEventListener("DOMContentLoaded", function(){
 		/*var a = JSON.stringify(Util.archive(t));
 		
 		console.log(Util.restoreWithJSON(a));*/
+		console.log(t);
 	});
 	
 }, true);
